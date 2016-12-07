@@ -143,7 +143,16 @@ func setupP2PKHTXout(amounts []*Amounts) ([]*TXout, error) {
 }
 
 //Pay pays in a nomal way.(P2KSH)
-func Pay(keys []*Key, addresses []*Amounts, service Service, customData []byte) ([]byte, error) {
+func Pay(keys []*Key, addresses []*Amounts, service Service) ([]byte, error) {
+	return payCommon(keys, addresses, service, make([]byte, 0))
+}
+
+//PayWithCustomData pays in a nomal way.(P2KSH) with an additional custom field (OP_RETURN)
+func PayWithCustomData(keys []*Key, addresses []*Amounts, service Service, customData []byte) ([]byte, error) {
+	return payCommon(keys, addresses, service, customData)
+}
+
+func payCommon(keys []*Key, addresses []*Amounts, service Service, customData []byte) ([]byte, error) {
 	var err error
 	var totalAmount uint64
 	for _, amount := range addresses {
