@@ -57,9 +57,10 @@ type TXout struct {
 
 //TX represents transaction.
 type TX struct {
-	Txin     []*TXin
-	Txout    []*TXout
-	Locktime uint32
+	Txin       []*TXin
+	Txout      []*TXout
+	Locktime   uint32
+	CustomData []byte
 }
 
 func (tx *TX) check() error {
@@ -82,6 +83,16 @@ func (tx *TX) check() error {
 			return fmt.Errorf("ScriptPubkey of number %d of Txout is nil", i)
 		}
 	}
+	return nil
+}
+
+// AttachCustomData will attach custom data to transaction (passed through an OP_RETURN operator)
+// 40 bytes max alloxwed by bitcoin protocol
+func (tx *TX) AttachCustomData(customData []byte) error {
+	if len(customData) > 40 {
+		return errors.New("Custom data too long (max 40bytes)")
+	}
+	tx.CustomData = customData
 	return nil
 }
 
@@ -143,6 +154,21 @@ func (tx *TX) getRawTransactionHash(numSign int) []byte {
 	return h[:]
 }
 
+func addCustomData(buffer *bytes.Buffer, data []byte) {
+	//Add custom data
+	var script []byte
+	script = append(script, opRETURN)
+	script = append(script, byte(len(data)))
+	script = append(script, data...)
+
+	satoshiBytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(satoshiBytes, 0)
+	buffer.Write(satoshiBytes)
+	scriptSigLength := len(script)
+	buffer.Write(toVI(uint64(scriptSigLength)))
+	buffer.Write(script)
+}
+
 //createRawTransaction creates a transaction from tx struct.
 //if numSing>=0, this returns a transaction for singning, and
 //numSign is number of txin which will be singed later.
@@ -196,9 +222,18 @@ func (tx *TX) createRawTransaction(numSign int) []byte {
 	}
 
 	//# of outputs
-	outputs := toVI(uint64(len(tx.Txout)))
+	additionalOutputs := uint64(0)
+	if len(tx.CustomData) != 0 {
+		additionalOutputs = 1
+	}
+	outputs := toVI(uint64(len(tx.Txout)) + additionalOutputs)
 	buffer.Write(outputs)
 
+	if len(tx.CustomData) != 0 {
+		addCustomData(&buffer, tx.CustomData)
+	}
+
+	//Add scripts for recipients
 	for _, out := range tx.Txout {
 		//Satoshis to send.
 		satoshiBytes := make([]byte, 8)
