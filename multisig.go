@@ -43,8 +43,8 @@ import (
 
 	"golang.org/x/crypto/ripemd160"
 
-	"github.com/StorjPlatform/gocoin/base58check"
-	"github.com/StorjPlatform/gocoin/btcec"
+	"github.com/TankerApp/gocoin/base58check"
+	"github.com/TankerApp/gocoin/btcec"
 )
 
 //RedeemScript represents Redeem script for M of N multisig transaction.

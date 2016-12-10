@@ -37,8 +37,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/StorjPlatform/gocoin/base58check"
-	"github.com/StorjPlatform/gocoin/btcec"
+	"github.com/TankerApp/gocoin/base58check"
+	"github.com/TankerApp/gocoin/btcec"
 	"golang.org/x/crypto/ripemd160"
 )
 

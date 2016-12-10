@@ -36,7 +36,7 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/StorjPlatform/gocoin/base58check"
+	"github.com/TankerApp/gocoin/base58check"
 )
 
 //Amounts represents amount of bitcoin of address
@@ -109,7 +109,7 @@ func setupP2PKHTXin(keys []*Key, totalAmount uint64, service Service) ([]*TXin, 
 	var amount uint64
 	for i := range utxos {
 		utxo := utxos[len(utxos)-1-i]
-		logging.Println("using utxo", utxo.Addr, hex.EncodeToString(utxo.Hash),utxo.Key)
+		logging.Println("using utxo", utxo.Addr, hex.EncodeToString(utxo.Hash), utxo.Key)
 		txin := TXin{}
 		txin.Hash = utxo.Hash
 		txin.Index = utxo.Index
@@ -144,6 +144,15 @@ func setupP2PKHTXout(amounts []*Amounts) ([]*TXout, error) {
 
 //Pay pays in a nomal way.(P2KSH)
 func Pay(keys []*Key, addresses []*Amounts, service Service) ([]byte, error) {
+	return payCommon(keys, addresses, service, make([]byte, 0))
+}
+
+//PayWithCustomData pays in a nomal way.(P2KSH) with an additional custom field (OP_RETURN)
+func PayWithCustomData(keys []*Key, addresses []*Amounts, service Service, customData []byte) ([]byte, error) {
+	return payCommon(keys, addresses, service, customData)
+}
+
+func payCommon(keys []*Key, addresses []*Amounts, service Service, customData []byte) ([]byte, error) {
 	var err error
 	var totalAmount uint64
 	for _, amount := range addresses {
@@ -182,6 +191,12 @@ func Pay(keys []*Key, addresses []*Amounts, service Service) ([]byte, error) {
 		tx.Txout, err = setupP2PKHTXout(a)
 		if err != nil {
 			return nil, err
+		}
+		if len(customData) != 0 {
+			err = tx.AttachCustomData(customData)
+			if err != nil {
+				return nil, err
+			}
 		}
 		rawtx, err = tx.MakeTX()
 		if err != nil {

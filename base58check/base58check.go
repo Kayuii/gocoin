@@ -7,7 +7,7 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/StorjPlatform/gocoin/base58check/base58"
+	"github.com/TankerApp/gocoin/base58check/base58"
 )
 
 func Encode(prefix byte, byteData []byte) string {
