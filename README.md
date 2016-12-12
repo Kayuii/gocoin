@@ -3,6 +3,11 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/StorjPlatform/gocoin/master/LICENSE)
 [![Coverage Status](https://coveralls.io/repos/StorjPlatform/gocoin/badge.svg?branch=master)](https://coveralls.io/r/StorjPlatform/gocoin?branch=master)
 
+This Package is obsolete.
+
+Please check [bitgoin](https://github.com/bitgoin).
+
+Thanks!
 
 # GOcoin 
 
